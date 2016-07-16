@@ -137,6 +137,29 @@ defineFunction("\\text", {
     };
 });
 
+// XML attributes
+defineFunction("\\xmlClass", {
+    numArgs: 2,
+    allowedInText: true,
+    greediness: 3,
+    argTypes: ["string", "original"],
+}, function(context, args) {
+    var cl = args[0];
+    var body = args[1];
+    // Normalize the different kinds of bodies (see \text above)
+    var inner;
+    if (body.type === "ordgroup") {
+        inner = body.value;
+    } else {
+        inner = [body];
+    }
+    return {
+        type: "xmlClass",
+        cl: cl,
+        value: inner,
+    };
+});
+
 // A two-argument custom color
 defineFunction("\\color", {
     numArgs: 2,
@@ -196,6 +219,20 @@ defineFunction("\\rule", {
         type: "rule",
         shift: shift && shift.value,
         width: width.value,
+        height: height.value,
+    };
+});
+
+defineFunction("\\cursor", {
+    numArgs: 1,
+    numOptionalArgs: 1,
+    argTypes: ["size", "size"],
+}, function(context, args) {
+    var shift = args[0];
+    var height = args[1];
+    return {
+        type: "cursor",
+        shift: shift && shift.value,
         height: height.value,
     };
 });

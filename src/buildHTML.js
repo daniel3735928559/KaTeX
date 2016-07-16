@@ -241,6 +241,20 @@ groupTypes.text = function(group, options, prev) {
         buildExpression(group.value.body, options.reset()));
 };
 
+groupTypes.xmlClass = function(group, options, prev) {
+    var elements = buildExpression(
+        group.value.value,
+        options.withColor(),
+        prev
+    );
+
+    // \color isn't supposed to affect the type of the elements it contains.
+    // To accomplish this, we wrap the results in a fragment, so the inner
+    // elements will be able to directly interact with their neighbors. For
+    // example, `\color{red}{2 +} 3` has the same spacing as `2 + 3`
+    return new buildCommon.makeFragment(elements, [group.value.cl]);
+};
+
 groupTypes.color = function(group, options, prev) {
     var elements = buildExpression(
         group.value.value,
@@ -1162,6 +1176,42 @@ groupTypes.leftright = function(group, options, prev) {
 
     return makeSpan(
         ["minner", options.style.cls()], inner, options.getColor());
+};
+
+groupTypes.cursor = function(group, options, prev) {
+    // Make an empty span for the rule
+    var cursor = makeSpan(["cursor"], [], options.getColor());
+
+    // Calculate the shift and height of the cursor, and account for units
+    var shift = 0;
+    if (group.value.shift) {
+        shift = group.value.shift.number;
+        if (group.value.shift.unit === "ex") {
+            shift *= fontMetrics.metrics.xHeight;
+        }
+    }
+    var height = group.value.height.number;
+    if (group.value.height.unit === "ex") {
+        height *= fontMetrics.metrics.xHeight;
+    }
+
+    // The sizes of cursors are absolute, so make it larger if we are in a
+    // smaller style.
+    //shift /= options.style.sizeMultiplier;
+    //height /= options.style.sizeMultiplier;
+
+    // Style the cursor to the right size
+    cursor.style.marginRight = "-1px";
+    cursor.style.borderRight = "1px solid";
+    cursor.style.marginBottom = shift + "em";
+    cursor.style.height = height + "em";
+
+    // Record the height and width
+    cursor.width = 1;
+    cursor.height = height + shift;
+    cursor.depth = -shift;
+
+    return cursor;
 };
 
 groupTypes.rule = function(group, options, prev) {

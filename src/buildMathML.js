@@ -166,6 +166,16 @@ groupTypes.color = function(group, options) {
     return node;
 };
 
+groupTypes.xmlClass = function(group, options) {
+    var inner = buildExpression(group.value.value, options);
+
+    var node = new mathMLTree.MathNode("mstyle", inner);
+
+    node.setAttribute("class", group.value.cl);
+
+    return node;
+};
+
 groupTypes.supsub = function(group, options) {
     var children = [buildGroup(group.value.base, options)];
 
@@ -333,6 +343,13 @@ groupTypes.op = function(group) {
         node = new mathMLTree.MathNode(
             "mi", [new mathMLTree.TextNode(group.value.body.slice(1))]);
     }
+
+    return node;
+};
+
+groupTypes.cursor = function(group) {
+    var node = new mathMLTree.MathNode(
+        "mtext", [new mathMLTree.TextNode("|")]);
 
     return node;
 };
